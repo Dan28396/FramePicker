@@ -49,6 +49,7 @@ main {
     flex: auto;
     font-size: 18px;
     margin: 20px auto 0 auto;
+    border-radius: 5px;
 }
 
 .fps__range {
