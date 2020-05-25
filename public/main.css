@@ -98,6 +98,13 @@ input[type="range"]::-webkit-slider-runnable-track {
     cursor: pointer;
 }
 
+input[type="range"]:disabled::-webkit-slider-runnable-track {
+background: rgb(107, 111, 111);
+}
+input[type="range"]:disabled::-webkit-slider-thumb {
+    background: var(--color-tabs);
+}
+
 
 p {
     text-align: center;
