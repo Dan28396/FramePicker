@@ -1,0 +1,60 @@
+<html>
+<head>
+    <title>Client</title>
+</head>
+<body>
+<video autoplay></video>
+<img src="">
+<input type="range" min="1" max="30" step="1" value="" style="display: none">
+<p style="display: none"></p >
+<button class="btn">Старт</button>
+<script>
+    const video = document.querySelector('video');
+    const img = document.querySelector('img');
+    const button = document.querySelector('.btn')
+    const range = document.querySelector('input')
+    const output = document.querySelector('p')
+    let FPS = 1;
+    range.value = FPS;
+    navigator.mediaDevices.getUserMedia({video: true, audio: false}).then((stream) => video.srcObject = stream);
+    let isCapturing = false;
+
+
+    button.addEventListener('click', toggleCapture)
+    range.addEventListener('change', changeFps)
+
+    function getFrame() {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const data = canvas.toDataURL('image/jpg');
+        img.src = data;
+        return data
+    }
+
+    function changeFps() {
+        output.innerHTML = range.value;
+        FPS = Number(range.value)
+    }
+
+
+    const WS_URL = location.origin.replace(/^http/, 'ws');
+    const ws = new WebSocket(WS_URL);
+    ws.onopen = () => {
+        console.log(`Connected to ${WS_URL}`);
+        setInterval(() => {
+            if (isCapturing) {
+                ws.send(getFrame());
+            }
+        }, 1000 / FPS);
+    }
+
+    function toggleCapture() {
+        isCapturing = !isCapturing;
+        button.innerHTML =
+            (button.innerHTML === 'Старт') ? button.innerHTML = 'Стоп' : button.innerHTML = 'Старт';
+    }
+</script>
+</body>
+</html>
