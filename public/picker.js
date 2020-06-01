@@ -43,9 +43,9 @@ ws.onopen = () => {
 }
 
 function toggleCapture() {
+    clearInterval(interval);
     isCapturing = !isCapturing;
-    button.innerHTML =
-        (button.innerHTML === 'Старт') ? button.innerHTML = 'Стоп' : button.innerHTML = 'Старт';
+    button.innerHTML = (button.innerHTML === 'Старт') ? 'Стоп' : 'Старт';
     if (ws.readyState === WebSocket.OPEN) {
         interval = setInterval(() => {
             if (isCapturing) {
