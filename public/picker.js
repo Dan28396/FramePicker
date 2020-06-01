@@ -15,12 +15,11 @@ range.addEventListener('change', changeFps)
 
 function getFrame() {
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    [canvas.width, canvas.height] = [video.videoWidth, video.videoHeight];
+
     canvas.getContext('2d').drawImage(video, 0, 0);
-    const data = canvas.toDataURL('image/jpg', 1);
-    img.src = data;
-    return data
+
+    return img.src = canvas.toDataURL('image/jpg', 1);
 }
 
 function changeFps() {
@@ -33,25 +32,17 @@ changeFps()
 
 const WS_URL = location.origin.replace(/^http/, 'ws');
 const ws = new WebSocket(WS_URL);
-ws.onopen = () => {
-    console.log(`Connected to ${WS_URL}`);
-    setInterval(() => {
-        if (isCapturing) {
-            ws.send(getFrame());
-        }
-    }, 1000 / FPS);
-}
+ws.onopen = () => console.log(`Connected to ${WS_URL}`);
 
 function toggleCapture() {
-    clearInterval(interval);
-    isCapturing = !isCapturing;
+    if (isCapturing) {
+      clearInterval(interval);
+    } else if (ws.readyState === WebSocket.OPEN) {
+      interval = setInterval(() => isCapturing && ws.send(getFrame()), 1000 / FPS);
+    } else {
+      console.log("Socket is closed!");
+    }
+
     button.innerHTML = (button.innerHTML === 'Старт') ? 'Стоп' : 'Старт';
-    if (ws.readyState === WebSocket.OPEN) {
-        interval = setInterval(() => {
-            if (isCapturing) {
-                ws.send(getFrame());
-            }
-        }, 1000 / FPS);
-    } else console.log("Socket is closed!")
-    range.disabled = isCapturing === true;
+    isCapturing = !isCapturing;
 }
