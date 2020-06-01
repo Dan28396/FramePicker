@@ -4,7 +4,8 @@ const http = require('http');
 const app = express();
 const httpServer = http.createServer(app);
 const WebSocket = require('ws');
-const fs = require('fs')
+const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -12,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 
 const wsServer = new WebSocket.Server({server: httpServer}, () => console.log(`WS server is listening at ws://localhost:${WS_PORT}`));
-let correctData, count = 0;
+let correctData;
 
 wsServer.on('connection', (ws, req) => {
     console.log('Connected');
@@ -23,14 +24,14 @@ wsServer.on('connection', (ws, req) => {
                     console.log("Photos directory wasn't created!")
                 } else console.log("Photos directory created!")
             })
-        } else count = files.length + 1
+        }
     });
     ws.on('message', data => {
+        const filename = uuidv4();
         correctData = data.split(';base64,').pop();
-        count += 1;
-        fs.writeFile(path.resolve(__dirname, `./photos/${count}.jpg`), correctData, 'base64', (err) => {
+        fs.writeFile(path.resolve(__dirname, `./photos/${filename}.jpg`), correctData, 'base64', (err) => {
             if (err) throw err;
-            console.log(`The file ${count} has been saved!`);
+            console.log(`The file ${filename} has been saved!`);
         })
     });
 });
